@@ -5,6 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { getLibraryIndex } from '../models/library.mjs';
 import { library, user } from '../models/dbConnections.mjs'; 
+import { verifyToken } from '../middlewares/jwtMiddleware.mjs';
 
 const router = new Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -13,7 +14,7 @@ const __dirname = path.dirname(__filename);
 const libraryIndex = getLibraryIndex(library);
 
 // 获取所有音轨
-router.get('/api/stream', async (ctx) => {
+router.get('/api/stream',verifyToken, async (ctx) => {
   try {
     const tracks = await libraryIndex.find(); 
     ctx.body = { tracks };

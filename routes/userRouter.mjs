@@ -2,15 +2,19 @@
 import Router from 'koa-router';
 import { getUserIndex } from '../models/users.mjs';
 import {  user } from '../models/dbConnections.mjs'; 
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 const router = new Router();
 const userIndex = getUserIndex(user);
 
+// load .env and jwt secret
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET
 
 // handle login request
 router.post('/auth/login', async (ctx) => {
     const { uid, secret } = ctx.request.body;
-    console.log(`${uid}: ${secret}`);
 
     try {
         // find user
@@ -18,13 +22,15 @@ router.post('/auth/login', async (ctx) => {
 
         console.log(`find user: ${user}`);
         if (user) {
-            // ctx.body = {
-            //     status: 0,
-            //     msg: "Success"
-            // };
+
+
+            // generate JWT
+            const token = jwt.sign({ uid: user.uid }, JWT_SECRET, { expiresIn: '1h' });
+
             ctx.body = {
                 status: 0,
                 msg: "Login successful",
+                token,
                 user: {
                     uid: user.uid,
                     name: user.name,
@@ -32,7 +38,7 @@ router.post('/auth/login', async (ctx) => {
                     subscribe_expired: user.subscribe_expired,
                     last_login: user.last_login,
                     playing: user.playing
-                }
+                },
             };
         } else {
             ctx.body = {
