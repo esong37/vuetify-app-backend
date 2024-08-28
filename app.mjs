@@ -10,6 +10,9 @@ import dotenv from 'dotenv';
 
 import streamRoutes from './routes/streamRoutes.mjs'; 
 import userRouter from './routes/userRouter.mjs'; 
+import libraryRoutes from './routes/libraryRoutes.mjs';
+import playlistRoutes from './routes/playlistRoutes.mjs';
+import albumRoutes from './routes/albumRoutes.mjs';
 
 
 dotenv.config();
@@ -21,19 +24,22 @@ const router = new Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 中间件配置
-app.use(cors()); // 允许跨域请求
+// middleware
+app.use(cors()); // allow cross-domain requests
 app.use(bodyParser());
 
-// 提供静态文件服务 (音频文件和图片)
+// static file services (images)
 app.use(serve(path.join(__dirname, '/public')));
 
-// 使用路由
+// use routes
 app.use(router.routes()).use(router.allowedMethods());
 app.use(streamRoutes.routes()).use(streamRoutes.allowedMethods()); 
 app.use(userRouter.routes()).use(userRouter.allowedMethods()); 
+app.use(libraryRoutes.routes()).use(libraryRoutes.allowedMethods());
+app.use(playlistRoutes.routes()).use(playlistRoutes.allowedMethods());
+app.use(albumRoutes.routes()).use(albumRoutes.allowedMethods());
 
-// 启动服务器
+// launch server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

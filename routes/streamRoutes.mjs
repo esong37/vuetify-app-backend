@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const libraryIndex = getLibraryIndex(library);
 
-// 获取所有音轨
+// get all tracks
 router.get('/api/stream',verifyToken, async (ctx) => {
   try {
     const tracks = await libraryIndex.find(); 
@@ -25,7 +25,6 @@ router.get('/api/stream',verifyToken, async (ctx) => {
   }
 });
 
-// 通过 `track_id` 串流音频文件
 router.get('/api/stream/:track_id', async ctx => {
   try {
     const trackId = ctx.params.track_id;
