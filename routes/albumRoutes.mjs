@@ -3,7 +3,7 @@ import Router from 'koa-router';
 import { verifyToken } from '../middlewares/jwtMiddleware.mjs';
 import { getPlaylistSchema, getPlaylistItemSchema } from '../models/playlist.mjs';
 import { playlist, library } from '../models/dbConnections.mjs';
-import { getLibraryIndex } from '../models/library.mjs';
+import { getLibraryIndex, getUserLibrarySchema } from '../models/library.mjs';
 
 const router = new Router();
 const Playlist = getPlaylistSchema(playlist);
@@ -69,6 +69,28 @@ router.get('/api/album/:pid', verifyToken, async (ctx) => {
         ctx.status = 500;
         ctx.body = { error: 'Internal Server Error' };
     }
+});
+
+// 处理收藏专辑的请求
+router.post('/api/album/favorite', verifyToken, async (ctx) => {
+    try {
+        const userId = ctx.state.user.uid; // 从 JWT 中获取用户 ID
+        const favoriteData = ctx.request.body;
+        const UserLibrary = getUserLibrarySchema(library, userId);
+    
+        // add user library to personal library
+        const newFavorite = new UserLibrary(favoriteData);
+        await newFavorite.save();
+    
+        console.log("new libray record added!")
+    
+        ctx.status = 200;
+        ctx.body = { message: 'Favorite added successfully' };
+      } catch (err) {
+        console.error(`Error adding favorite: ${err}`);
+        ctx.status = 500;
+        ctx.body = { error: 'Internal Server Error' };
+      }
 });
 
 export default router;

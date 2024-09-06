@@ -4,6 +4,7 @@ import { getUserIndex } from '../models/users.mjs';
 import {  user } from '../models/dbConnections.mjs'; 
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { verifyToken } from '../middlewares/jwtMiddleware.mjs'; // JWT 
 
 const router = new Router();
 const userIndex = getUserIndex(user);
@@ -105,5 +106,30 @@ router.post('/auth/register', async (ctx) => {
         };
     }
 });
+
+router.get('/api/user/info', verifyToken, async (ctx) => {
+    try {
+      const userId = ctx.state.user.uid; // 从 JWT 中获取用户 ID
+  
+      const userInfo = await userIndex.findOne({ uid: userId });
+  
+      if (userInfo) {
+        ctx.body = {
+          uid: userInfo.uid,
+          name: userInfo.name,
+          subscribe: userInfo.subscribe,
+          subscribe_expired: userInfo.subscribe_expired,
+          last_login: userInfo.last_login,
+        };
+      } else {
+        ctx.status = 404;
+        ctx.body = { error: 'User not found' };
+      }
+    } catch (err) {
+      console.error(`Error fetching user info: ${err}`);
+      ctx.status = 500;
+      ctx.body = { error: 'Internal Server Error' };
+    }
+  });
 
 export default router;
